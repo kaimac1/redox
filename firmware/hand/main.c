@@ -24,7 +24,7 @@ int main() {
     // TODO: set up ADC
 
     uart_init();
-    xdev_out(uart_put_char);
+    xdev_out(uart_putchar);
     xprintf("\r\nHand %d\r\n", hand);
     
     // Initialise NRF24
