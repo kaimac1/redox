@@ -13,15 +13,12 @@ uint8_t tx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
 uint8_t rx_address[5] = {0x11,0x23,0x58,0x13,0x00};
 
 uint8_t matrix_prev[ROWS];
-uint8_t hand = 0;
+uint8_t hand = 1;
 
 /******************************************************************************/
 int main() {
 
     uint8_t i, change, st;
-
-    // Enable 3.3 V regulator to power the NRF24
-    //UHWCON |= (1<<UVREGE);
 
     // TODO: determine which hand from GPIO pin
     // TODO: set up ADC
@@ -47,6 +44,12 @@ int main() {
     st = nrf24_getStatus();
     xprintf("status=%d\r\n", st);
 
+    // Set up LED and flash it briefly
+    DDRE |= 1<<6;
+    PORTE = 1<<6;
+    _delay_ms(500);
+    PORTE = 0;
+
     // Scan the matrix and detect any changes.
     // Modified rows are sent to the receiver.
     while (1) {
@@ -66,23 +69,3 @@ int main() {
     }
 
 }
-
-
-    /*nrf24_send(out);
-    while (nrf24_isSending());
-
-    temp = nrf24_lastMessageStatus();
-    if(temp == NRF24_TRANSMISSON_OK) {                    
-        xprintf("ok\r\n");
-    } else if(temp == NRF24_MESSAGE_LOST) {                    
-        xprintf("failed\r\n");    
-    }
-
-    temp = nrf24_retransmissionCount();
-    xprintf("retx: %d\r\n",temp);*/
-
-    /* Optionally, go back to RX mode ... */
-    //nrf24_powerUpRx();
-    /* Or you might want to power down after TX */
-    // nrf24_powerDown();            
-
