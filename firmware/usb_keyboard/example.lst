@@ -1,0 +1,298 @@
+   1               		.file	"example.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.__vector_23,"ax",@progbits
+  17               	.global	__vector_23
+  19               	__vector_23:
+  20               	.LFB7:
+  21               	.LSM0:
+  22 0000 1F92      		push __zero_reg__
+  23 0002 0F92      		push r0
+  24 0004 0FB6      		in r0,__SREG__
+  25 0006 0F92      		push r0
+  26 0008 1124      		clr __zero_reg__
+  27 000a 2F93      		push r18
+  28 000c 3F93      		push r19
+  29 000e 4F93      		push r20
+  30 0010 5F93      		push r21
+  31 0012 6F93      		push r22
+  32 0014 7F93      		push r23
+  33 0016 8F93      		push r24
+  34 0018 9F93      		push r25
+  35 001a AF93      		push r26
+  36 001c BF93      		push r27
+  37 001e EF93      		push r30
+  38 0020 FF93      		push r31
+  39               	/* prologue: Signal */
+  40               	/* frame size = 0 */
+  41               	.LSM1:
+  42 0022 8091 0000 		lds r24,idle_count
+  43 0026 9091 0000 		lds r25,(idle_count)+1
+  44 002a 0196      		adiw r24,1
+  45 002c 9093 0000 		sts (idle_count)+1,r25
+  46 0030 8093 0000 		sts idle_count,r24
+  47               	.LSM2:
+  48 0034 895E      		subi r24,lo8(489)
+  49 0036 9140      		sbci r25,hi8(489)
+  50 0038 00F0      		brlo .L3
+  51               	.LSM3:
+  52 003a 1092 0000 		sts (idle_count)+1,__zero_reg__
+  53 003e 1092 0000 		sts idle_count,__zero_reg__
+  54               	.LSM4:
+  55 0042 8CE2      		ldi r24,lo8(44)
+  56 0044 60E0      		ldi r22,lo8(0)
+  57 0046 0E94 0000 		call usb_keyboard_press
+  58               	.L3:
+  59               	/* epilogue start */
+  60               	.LSM5:
+  61 004a FF91      		pop r31
+  62 004c EF91      		pop r30
+  63 004e BF91      		pop r27
+  64 0050 AF91      		pop r26
+  65 0052 9F91      		pop r25
+  66 0054 8F91      		pop r24
+  67 0056 7F91      		pop r23
+  68 0058 6F91      		pop r22
+  69 005a 5F91      		pop r21
+  70 005c 4F91      		pop r20
+  71 005e 3F91      		pop r19
+  72 0060 2F91      		pop r18
+  73 0062 0F90      		pop r0
+  74 0064 0FBE      		out __SREG__,r0
+  75 0066 0F90      		pop r0
+  76 0068 1F90      		pop __zero_reg__
+  77 006a 1895      		reti
+  78               	.LFE7:
+  80               		.section	.text.main,"ax",@progbits
+  81               	.global	main
+  83               	main:
+  84               	.LFB6:
+  85               	.LSM6:
+  86 0000 AF92      		push r10
+  87 0002 BF92      		push r11
+  88 0004 DF92      		push r13
+  89 0006 EF92      		push r14
+  90 0008 FF92      		push r15
+  91 000a 0F93      		push r16
+  92 000c 1F93      		push r17
+  93 000e CF93      		push r28
+  94 0010 DF93      		push r29
+  95               	/* prologue: function */
+  96               	/* frame size = 0 */
+  97               	.LSM7:
+  98 0012 80E8      		ldi r24,lo8(-128)
+  99 0014 8093 6100 		sts 97,r24
+ 100 0018 1092 6100 		sts 97,__zero_reg__
+ 101               	.LSM8:
+ 102 001c 1AB8      		out 42-32,__zero_reg__
+ 103               	.LSM9:
+ 104 001e 14B8      		out 36-32,__zero_reg__
+ 105               	.LSM10:
+ 106 0020 8FEF      		ldi r24,lo8(-1)
+ 107 0022 85B9      		out 37-32,r24
+ 108               	.LSM11:
+ 109 0024 8BB9      		out 43-32,r24
+ 110               	.LSM12:
+ 111 0026 0E94 0000 		call usb_init
+ 112               	.L5:
+ 113               	.LSM13:
+ 114 002a 0E94 0000 		call usb_configured
+ 115 002e 8823      		tst r24
+ 116 0030 01F0      		breq .L5
+ 117 0032 80E1      		ldi r24,lo8(10000)
+ 118 0034 97E2      		ldi r25,hi8(10000)
+ 119               	.LVL0:
+ 120               	.LBB18:
+ 121               	.LBB19:
+ 122               	.LBB20:
+ 123               	.LBB21:
+ 124               	.LSM14:
+ 125 0036 20E9      		ldi r18,lo8(400)
+ 126 0038 31E0      		ldi r19,hi8(400)
+ 127               	.L6:
+ 128 003a F901      		movw r30,r18
+ 129               	.LVL1:
+ 130               	/* #APP */
+ 131               	 ;  105 "c:/winavr-20100110/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 132 003c 3197      		1: sbiw r30,1
+ 133 003e 01F4      		brne 1b
+ 134               	 ;  0 "" 2
+ 135               	/* #NOAPP */
+ 136               	.LBE21:
+ 137               	.LBE20:
+ 138               	.LSM15:
+ 139 0040 0197      		sbiw r24,1
+ 140               	.LSM16:
+ 141 0042 01F4      		brne .L6
+ 142               	.LBE19:
+ 143               	.LBE18:
+ 144               	.LSM17:
+ 145 0044 14BC      		out 68-32,__zero_reg__
+ 146               	.LSM18:
+ 147 0046 85E0      		ldi r24,lo8(5)
+ 148               	.LVL2:
+ 149 0048 85BD      		out 69-32,r24
+ 150               	.LSM19:
+ 151 004a 81E0      		ldi r24,lo8(1)
+ 152 004c 8093 6E00 		sts 110,r24
+ 153 0050 FF24      		clr r15
+ 154 0052 FA94      		dec r15
+ 155               	.LVL3:
+ 156 0054 0FEF      		ldi r16,lo8(-1)
+ 157               	.LVL4:
+ 158               	.LBB22:
+ 159               	.LBB23:
+ 160               	.LBB24:
+ 161               	.LBB25:
+ 162               	.LSM20:
+ 163 0056 80E4      		ldi r24,lo8(8000)
+ 164 0058 A82E      		mov r10,r24
+ 165 005a 8FE1      		ldi r24,hi8(8000)
+ 166 005c B82E      		mov r11,r24
+ 167               	.LVL5:
+ 168               	.L12:
+ 169               	.LBE25:
+ 170               	.LBE24:
+ 171               	.LBE23:
+ 172               	.LBE22:
+ 173               	.LSM21:
+ 174 005e D3B0      		in r13,35-32
+ 175               	.LSM22:
+ 176 0060 E9B0      		in r14,41-32
+ 177 0062 C0E0      		ldi r28,lo8(number_keys)
+ 178 0064 D0E0      		ldi r29,hi8(number_keys)
+ 179 0066 11E0      		ldi r17,lo8(1)
+ 180 0068 90E0      		ldi r25,lo8(0)
+ 181               	.L10:
+ 182               	.LSM23:
+ 183 006a 812F      		mov r24,r17
+ 184               	.LVL6:
+ 185 006c 8D21      		and r24,r13
+ 186 006e 01F4      		brne .L7
+ 187 0070 812F      		mov r24,r17
+ 188 0072 8F21      		and r24,r15
+ 189 0074 01F0      		breq .L7
+ 190               	.LSM24:
+ 191 0076 85E0      		ldi r24,lo8(5)
+ 192 0078 62E0      		ldi r22,lo8(2)
+ 193 007a 0E94 0000 		call usb_keyboard_press
+ 194               	.LVL7:
+ 195               	.LSM25:
+ 196 007e 8881      		ld r24,Y
+ 197 0080 60E0      		ldi r22,lo8(0)
+ 198 0082 0E94 0000 		call usb_keyboard_press
+ 199 0086 91E0      		ldi r25,lo8(1)
+ 200               	.LVL8:
+ 201               	.L7:
+ 202               	.LSM26:
+ 203 0088 812F      		mov r24,r17
+ 204 008a 8E21      		and r24,r14
+ 205 008c 01F4      		brne .L8
+ 206 008e 812F      		mov r24,r17
+ 207 0090 8023      		and r24,r16
+ 208 0092 01F0      		breq .L8
+ 209               	.LSM27:
+ 210 0094 87E0      		ldi r24,lo8(7)
+ 211 0096 62E0      		ldi r22,lo8(2)
+ 212 0098 0E94 0000 		call usb_keyboard_press
+ 213               	.LVL9:
+ 214               	.LSM28:
+ 215 009c 8881      		ld r24,Y
+ 216 009e 60E0      		ldi r22,lo8(0)
+ 217 00a0 0E94 0000 		call usb_keyboard_press
+ 218 00a4 91E0      		ldi r25,lo8(1)
+ 219               	.LVL10:
+ 220               	.L8:
+ 221 00a6 2196      		adiw r28,1
+ 222               	.LSM29:
+ 223 00a8 80E0      		ldi r24,hi8(number_keys+8)
+ 224 00aa C030      		cpi r28,lo8(number_keys+8)
+ 225 00ac D807      		cpc r29,r24
+ 226 00ae 01F0      		breq .L9
+ 227               	.LSM30:
+ 228 00b0 110F      		lsl r17
+ 229 00b2 00C0      		rjmp .L10
+ 230               	.L9:
+ 231               	.LSM31:
+ 232 00b4 9923      		tst r25
+ 233 00b6 01F0      		breq .L11
+ 234               	.LSM32:
+ 235               	/* #APP */
+ 236               	 ;  99 "example.c" 1
+ 237 00b8 F894      		cli
+ 238               	 ;  0 "" 2
+ 239               	.LSM33:
+ 240               	/* #NOAPP */
+ 241 00ba 1092 0000 		sts (idle_count)+1,__zero_reg__
+ 242 00be 1092 0000 		sts idle_count,__zero_reg__
+ 243               	.LSM34:
+ 244               	/* #APP */
+ 245               	 ;  101 "example.c" 1
+ 246 00c2 7894      		sei
+ 247               	 ;  0 "" 2
+ 248               	/* #NOAPP */
+ 249               	.L11:
+ 250               	.LBB29:
+ 251               	.LBB28:
+ 252               	.LBB27:
+ 253               	.LBB26:
+ 254               	.LSM35:
+ 255 00c4 C501      		movw r24,r10
+ 256               	.LVL11:
+ 257               	/* #APP */
+ 258               	 ;  105 "c:/winavr-20100110/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 259 00c6 0197      		1: sbiw r24,1
+ 260 00c8 01F4      		brne 1b
+ 261               	 ;  0 "" 2
+ 262               	/* #NOAPP */
+ 263 00ca 0E2D      		mov r16,r14
+ 264 00cc FD2C      		mov r15,r13
+ 265 00ce 00C0      		rjmp .L12
+ 266               	.LBE26:
+ 267               	.LBE27:
+ 268               	.LBE28:
+ 269               	.LBE29:
+ 270               	.LFE6:
+ 272               	.global	number_keys
+ 273               		.data
+ 276               	number_keys:
+ 277 0000 27        		.byte	39
+ 278 0001 1E        		.byte	30
+ 279 0002 1F        		.byte	31
+ 280 0003 20        		.byte	32
+ 281 0004 21        		.byte	33
+ 282 0005 22        		.byte	34
+ 283 0006 23        		.byte	35
+ 284 0007 24        		.byte	36
+ 285 0008 25        		.byte	37
+ 286 0009 26        		.byte	38
+ 287               	.global	idle_count
+ 288               	.global	idle_count
+ 289               		.section .bss
+ 292               	idle_count:
+ 293 0000 0000      		.skip 2,0
+ 326               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 example.c
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:2      *ABS*:0000003f __SREG__
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:3      *ABS*:0000003e __SP_H__
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:4      *ABS*:0000003d __SP_L__
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:5      *ABS*:00000034 __CCP__
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:19     .text.__vector_23:00000000 __vector_23
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:292    .bss:00000000 idle_count
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:83     .text.main:00000000 main
+C:\Users\mcinnes\AppData\Local\Temp/cc4AqBYr.s:276    .data:00000000 number_keys
+
+UNDEFINED SYMBOLS
+usb_keyboard_press
+usb_init
+usb_configured
+__do_copy_data
+__do_clear_bss
