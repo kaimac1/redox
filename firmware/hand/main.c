@@ -7,24 +7,29 @@
 #include "uart.h"
 
 /******************************************************************************/
+#define DEBUG 1
 #define CHANNEL 2
 uint8_t msg[3];
 uint8_t tx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
 uint8_t rx_address[5] = {0x11,0x23,0x58,0x13,0x00};
 
 uint8_t matrix_prev[ROWS];
-uint8_t hand = 1;
 
 /******************************************************************************/
 int main() {
 
     uint8_t i, change, st;
+    uint8_t hand;
 
-    // TODO: determine which hand from GPIO pin
     // TODO: set up ADC
 
     uart_init();
     xdev_out(uart_putchar);
+
+    // Determine which hand from PE2
+    PORTE = (1 << 2);
+    DDRE = 0;
+    hand = (PINE & 0x04) ? 0 : 1;
     xprintf("\r\nHand %d\r\n", hand);
     
     // Initialise NRF24
@@ -58,7 +63,7 @@ int main() {
         for (i=0; i<ROWS; i++) {
             change = matrix_prev[i] ^ matrix[i];
             if (change) {
-                xprintf("%d %08b -> %08b\r\n", i, matrix_prev[i], matrix[i]);
+                if (DEBUG) xprintf("%d %08b -> %08b\r\n", i, matrix_prev[i], matrix[i]);
                 msg[1] = i;
                 msg[2] = matrix[i];
                 nrf24_send(msg);
