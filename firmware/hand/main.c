@@ -12,16 +12,15 @@
 uint8_t msg[3];
 uint8_t tx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
 uint8_t rx_address[5] = {0x11,0x23,0x58,0x13,0x00};
-
 uint8_t matrix_prev[ROWS];
+
+uint8_t battery_voltage(void);
 
 /******************************************************************************/
 int main() {
 
-    uint8_t i, change, st;
+    uint8_t i, change;
     uint8_t hand;
-
-    // TODO: set up ADC
 
     uart_init();
     xdev_out(uart_putchar);
@@ -46,18 +45,17 @@ int main() {
     msg[1] = 0;
     msg[2] = 0;
 
-    st = nrf24_getStatus();
-    xprintf("status=%d\r\n", st);
-
     // Set up LED and flash it briefly
     DDRE |= 1<<6;
     PORTE = 1<<6;
     _delay_ms(500);
     PORTE = 0;
 
+    battery_voltage();
+
     // Scan the matrix and detect any changes.
     // Modified rows are sent to the receiver.
-    while (1) {
+    while (1) {        
         matrix_scan();
 
         for (i=0; i<ROWS; i++) {
@@ -72,5 +70,23 @@ int main() {
             matrix_prev[i] = matrix[i];
         }
     }
+
+}
+
+uint8_t battery_voltage(void) {
+
+    DIDR0 = 1;
+    ADMUX = (1 << ADLAR); // Left aligned
+    ADCSRA = (1 << ADPS1) | (1 << ADPS2); // 125 kHz clock
+    ADCSRA |= (1 << ADEN);
+    ADCSRA |= (1 << ADSC); // Start conversion
+
+    // Wait for end of conversion and reset ADIF
+    while (!(ADCSRA & (1 << ADIF)));
+    ADCSRA &= ~(1 << ADIF);
+
+    xprintf("%d\r\n", ADCH);
+
+    ADCSRA &= ~(1 << ADEN);
 
 }
