@@ -1,4 +1,6 @@
 #include <avr/io.h>
+#include <avr/sleep.h>
+#include <avr/interrupt.h>
 #include <stdint.h>
 #include <util/delay.h>
 #include "util/xprintf.h"
@@ -13,8 +15,11 @@ uint8_t msg[3];
 uint8_t tx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
 uint8_t rx_address[5] = {0x11,0x23,0x58,0x13,0x00};
 uint8_t matrix_prev[ROWS];
+uint8_t voltage;
 
-uint8_t battery_voltage(void);
+void get_voltage(void);
+void check_voltage(void);
+void enter_sleep_mode(void);
 
 /******************************************************************************/
 int main() {
@@ -25,7 +30,8 @@ int main() {
     uart_init();
     xdev_out(uart_putchar);
 
-    // Determine which hand from PE2
+    // Determine which hand this is from PE2
+    // Left is hand 0, right is hand 1
     PORTE = (1 << 2);
     DDRE = 0;
     hand = (PINE & 0x04) ? 0 : 1;
@@ -51,29 +57,39 @@ int main() {
     _delay_ms(500);
     PORTE = 0;
 
-    battery_voltage();
+    get_voltage();
+    check_voltage();
+
+
+    enter_sleep_mode();    
 
     // Scan the matrix and detect any changes.
     // Modified rows are sent to the receiver.
-    while (1) {        
+    while (1) {  
         matrix_scan();
 
         for (i=0; i<ROWS; i++) {
             change = matrix_prev[i] ^ matrix[i];
+
+            // If this row has changed, send the row number and its current state
             if (change) {
                 if (DEBUG) xprintf("%d %08b -> %08b\r\n", i, matrix_prev[i], matrix[i]);
                 msg[1] = i;
                 msg[2] = matrix[i];
+
                 nrf24_send(msg);
                 while (nrf24_isSending());
             }
+            
             matrix_prev[i] = matrix[i];
         }
     }
 
 }
 
-uint8_t battery_voltage(void) {
+/******************************************************************************/
+// Measure the battery voltage and store in [voltage].
+void get_voltage(void) {
 
     DIDR0 = 1;
     ADMUX = (1 << ADLAR); // Left aligned
@@ -85,8 +101,46 @@ uint8_t battery_voltage(void) {
     while (!(ADCSRA & (1 << ADIF)));
     ADCSRA &= ~(1 << ADIF);
 
-    xprintf("%d\r\n", ADCH);
+    voltage = ADCH;
 
-    ADCSRA &= ~(1 << ADEN);
+    ADCSRA &= ~(1 << ADEN); // Disable ADC
+
+}
+
+/******************************************************************************/
+// Check the battery voltage and flash the LED if the battery is low.
+void check_voltage(void) {
+
+    xprintf("adc = %d\r\n", voltage);
+
+}
+
+/******************************************************************************/
+void enter_sleep_mode(void) {
+
+    get_voltage();
+
+    sei();                  // Enable interrupts
+    PORTD = 0x73;           // Select all rows
+    PCMSK0 = 0xFF;          // Enable all pin change interrupts
+    PCICR = (1 << PCIE0);
+
+    set_sleep_mode(SLEEP_MODE_IDLE);
+    sleep_enable();
+    sleep_mode();
+    sleep_disable();
+
+    xprintf("woke up!\r\n");
+
+    check_voltage();
+
+}
+
+/******************************************************************************/
+// Pin change interrupt - wakes the MCU up from sleep mode.
+ISR(PCINT0_vect) {
+
+    PCICR = 0;
+    matrix_deselect();
 
 }
