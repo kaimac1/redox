@@ -9,8 +9,10 @@
 #include "uart.h"
 
 /******************************************************************************/
+#define SLEEP_TIMEOUT 300000UL
 #define DEBUG 1
 #define CHANNEL 2
+
 uint8_t msg[3];
 uint8_t tx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
 uint8_t rx_address[5] = {0x11,0x23,0x58,0x13,0x00};
@@ -26,6 +28,7 @@ int main() {
 
     uint8_t i, change;
     uint8_t hand;
+    uint32_t timeout = 0;
 
     uart_init();
     xdev_out(uart_putchar);
@@ -60,12 +63,10 @@ int main() {
     get_voltage();
     check_voltage();
 
-
-    enter_sleep_mode();    
-
     // Scan the matrix and detect any changes.
     // Modified rows are sent to the receiver.
     while (1) {  
+        timeout++;
         matrix_scan();
 
         for (i=0; i<ROWS; i++) {
@@ -73,15 +74,22 @@ int main() {
 
             // If this row has changed, send the row number and its current state
             if (change) {
-                if (DEBUG) xprintf("%d %08b -> %08b\r\n", i, matrix_prev[i], matrix[i]);
+                if (DEBUG) xprintf("%d %08b -> %08b   %ld\r\n", i, matrix_prev[i], matrix[i], timeout);
                 msg[1] = i;
                 msg[2] = matrix[i];
 
                 nrf24_send(msg);
                 while (nrf24_isSending());
+                timeout = 0;
             }
-            
+
             matrix_prev[i] = matrix[i];
+        }
+
+        // Sleep if there has been no activity for a while
+        if (timeout > SLEEP_TIMEOUT) {
+            timeout = 0;
+            enter_sleep_mode();
         }
     }
 
@@ -120,17 +128,21 @@ void enter_sleep_mode(void) {
 
     get_voltage();
 
-    sei();                  // Enable interrupts
+    xprintf("sleeping\r\n");
+
+    cli();
     PORTD = 0x73;           // Select all rows
     PCMSK0 = 0xFF;          // Enable all pin change interrupts
+    PCIFR = (1 << PCIF0);
     PCICR = (1 << PCIE0);
 
+
     set_sleep_mode(SLEEP_MODE_IDLE);
-    sleep_enable();
+    sei();                  // Enable interrupts       
     sleep_mode();
-    sleep_disable();
 
     xprintf("woke up!\r\n");
+    PCICR = 0;
 
     check_voltage();
 
@@ -140,7 +152,7 @@ void enter_sleep_mode(void) {
 // Pin change interrupt - wakes the MCU up from sleep mode.
 ISR(PCINT0_vect) {
 
-    PCICR = 0;
+
     matrix_deselect();
 
 }
