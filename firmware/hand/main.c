@@ -9,7 +9,7 @@
 #include "uart.h"
 
 /******************************************************************************/
-#define SLEEP_TIMEOUT 300000UL
+#define SLEEP_TIMEOUT (100000UL) //(300000UL * 1) // 10 minutes
 #define DEBUG 1
 #define CHANNEL 2
 
@@ -97,21 +97,30 @@ int main() {
 
 /******************************************************************************/
 // Measure the battery voltage and store in [voltage].
+#define ADC_N 10
 void get_voltage(void) {
+
+    uint8_t i;
+    uint16_t v = 0;
 
     DIDR0 = 1;
     ADMUX = (1 << ADLAR); // Left aligned
     ADCSRA = (1 << ADPS1) | (1 << ADPS2); // 125 kHz clock
     ADCSRA |= (1 << ADEN);
-    ADCSRA |= (1 << ADSC); // Start conversion
+    
+    // Get an average of 10 readings
+    for (i=0; i<ADC_N; i++) {
+        ADCSRA |= (1 << ADSC); // Start conversion
+        while (!(ADCSRA & (1 << ADIF)));
+        ADCSRA &= ~(1 << ADIF);
 
-    // Wait for end of conversion and reset ADIF
-    while (!(ADCSRA & (1 << ADIF)));
-    ADCSRA &= ~(1 << ADIF);
+        v += ADCH;
+    }
 
-    voltage = ADCH;
+    voltage = v / ADC_N;    
 
     ADCSRA &= ~(1 << ADEN); // Disable ADC
+
 
 }
 
@@ -119,7 +128,12 @@ void get_voltage(void) {
 // Check the battery voltage and flash the LED if the battery is low.
 void check_voltage(void) {
 
-    xprintf("adc = %d\r\n", voltage);
+    // TODO: finish this
+    if (voltage < 76) {
+        PORTE = 1<<6;
+        _delay_ms(1500);
+        PORTE = 0;
+    }
 
 }
 
@@ -137,12 +151,9 @@ void enter_sleep_mode(void) {
     PCICR = (1 << PCIE0);
 
 
-    set_sleep_mode(SLEEP_MODE_IDLE);
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sei();                  // Enable interrupts       
     sleep_mode();
-
-    xprintf("woke up!\r\n");
-    PCICR = 0;
 
     check_voltage();
 
@@ -152,7 +163,7 @@ void enter_sleep_mode(void) {
 // Pin change interrupt - wakes the MCU up from sleep mode.
 ISR(PCINT0_vect) {
 
-
+    PCICR = 0;
     matrix_deselect();
 
 }
