@@ -2,30 +2,25 @@
 #include <util/delay.h>
 #include <stdint.h>
 
-#define uart_pin_output()    DDRD |= (1<<3)
-#define uart_set_pin()        PORTD |= (1<<3)
-#define uart_clr_pin()        PORTD &= ~(1<<3)
-#define uart_bit_dly()        _delay_us(100)
+#define UBRRVAL 51 // 9600 baud at 8 MHz
 
+/******************************************************************************/
 void uart_init() {
-    uart_pin_output();
+
+    DDRD |= (1<<3);
+    
+    UBRR1H = (unsigned char)(UBRRVAL >> 8);
+    UBRR1L = (unsigned char)(UBRRVAL);
+
+    UCSR1C = (1 << UCSZ10) | (1 << UCSZ11);
+    UCSR1B = (1 << TXEN1);
+
 }
-void uart_put_char(uint8_t tx) {
-    uint8_t i;
 
-    uart_clr_pin();
-    uart_bit_dly();
+/******************************************************************************/
+void uart_putchar(uint8_t tx) {
 
-    for (i=0;i<8;i++) {
-        if (tx & (1<<i)) {
-            uart_set_pin();
-        } else {
-            uart_clr_pin();
-        }
+    while (!(UCSR1A & (1 << UDRE1)));
+    UDR1 = tx;
 
-        uart_bit_dly();
-    }
-
-    uart_set_pin();
-    uart_bit_dly();
 }

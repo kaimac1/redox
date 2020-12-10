@@ -1,3 +1,4 @@
+
 PROJECT = rx
 
 ### Source files and search directory
@@ -5,7 +6,7 @@ CSRC    = main.c nrf24.c xprintf.c nrf24_pins.c uart.c usb.c keyboard.c
 ASRC    = 
 VPATH   = util nrf24
 DEVICE  = atmega32u4
-F_OSC   = 16000000
+F_OSC   = 8000000
 AVRDUDE = avrdude -c usbtiny -p t84 -U flash:w:$(PROJECT).hex
 
 ###############################################################################
@@ -138,9 +139,8 @@ size:
 
 # Compile: create object files from C source files. ARM or Thumb(-2)
 $(COBJ) : $(OBJDIR)/%.o : %.c
-	@echo
-	@echo $< :
-	$(CC) -c $(CFLAGS) $< -o $@
+	@echo $<
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 # Assemble: create object files from assembler source files. ARM or Thumb(-2)
 $(AOBJ) : $(OBJDIR)/%.o : %.S
