@@ -1,4 +1,5 @@
 #include "nrf24/nrf24.h"
+#include "../common.h"
 #include <avr/io.h>
 #include <stdint.h>
 #include <util/delay.h>
@@ -11,10 +12,8 @@
 #define CPU_16MHz       0x00
 #define CPU_8MHz        0x01
 
-const uint8_t channel = 20;
-uint8_t tx_address[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
-uint8_t rx_address[5] = {0x4E,0xD0,0xBA,0x5E,0x00};
-
+uint8_t tx_address[nrf24_ADDR_LEN] = {0xD7,0xD7,0xD7,0xD7,0xD7};
+uint8_t rx_address[nrf24_ADDR_LEN] = RECEIVER_ADDRESS;
 uint8_t msg[3];
 
 void timer_init(void) {
@@ -43,7 +42,7 @@ int main() {
 
     xprintf("Radio init:\t");
     nrf24_init();
-    nrf24_config(channel, sizeof msg);
+    nrf24_config(RF_CHANNEL, sizeof msg);
     nrf24_tx_address(tx_address);
     nrf24_rx_address(rx_address);
     uint8_t st = nrf24_getStatus();

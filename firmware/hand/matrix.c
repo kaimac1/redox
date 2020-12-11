@@ -3,8 +3,8 @@
 #include <stdint.h>
 #include <util/delay.h>
 
-uint8_t matrix[ROWS];
-uint8_t row_pin[ROWS] = {0,1,4,5,6};
+uint8_t matrix[NUM_ROWS];
+uint8_t row_pin[NUM_ROWS] = {0,1,4,5,6};
 
 /******************************************************************************/
 void matrix_init(void) {
@@ -17,7 +17,7 @@ void matrix_scan(void) {
 
     uint8_t i;
 
-    for (i=0; i<ROWS; i++) {
+    for (i=0; i<NUM_ROWS; i++) {
         matrix_select_row(i);
         _delay_us(30);
         matrix[i] = PINB;

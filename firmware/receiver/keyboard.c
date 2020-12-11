@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "../common.h"
 #include "keyboard.h"
 #include "usb.h"
 #include "util/xprintf.h"
@@ -8,9 +9,6 @@ static void set_usb_key(uint8_t scancode, uint8_t state);
 
 uint8_t keystate[10];
 
-#define ROFFSET_LEFT    0 
-#define ROFFSET_RIGHT   5
-
 /******************************************************************************/
 
 // Turn the column state for the given hand and row into a series of calls to
@@ -18,9 +16,10 @@ uint8_t keystate[10];
 void handle_row(uint8_t hand, uint8_t row, uint8_t cols) {
 
     if ((hand != HAND_LEFT) && (hand != HAND_RIGHT)) return;
+    if (row >= NUM_ROWS) return;
 
     // Row offset into the keystate array
-    uint8_t offs = (hand == HAND_LEFT ? ROFFSET_LEFT : ROFFSET_RIGHT);
+    uint8_t offs = (hand == HAND_LEFT ? 0 : NUM_ROWS);
 
     uint8_t change = keystate[row+offs] ^ cols;
     uint8_t i;
