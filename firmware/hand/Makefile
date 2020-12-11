@@ -1,7 +1,7 @@
 PROJECT = hand
 
 ### Source files and search directory
-CSRC    = main.c nrf24.c xprintf.c radioPinFunctions.c matrix.c uart.c
+CSRC    = main.c hw.c nrf24.c xprintf.c radioPinFunctions.c matrix.c
 ASRC    = 
 VPATH   = util nrf24
 DEVICE  = atmega32u4
