@@ -3,19 +3,24 @@
 #include "usb.h"
 #include "util/xprintf.h"
 
-
 static void handle_key(uint8_t row, uint8_t col, uint8_t state);
 static void set_usb_key(uint8_t scancode, uint8_t state);
+
 uint8_t keystate[10];
 
+#define ROFFSET_LEFT    0 
+#define ROFFSET_RIGHT   5
 
 /******************************************************************************/
+
 // Turn the column state for the given hand and row into a series of calls to
 // handle_key() to process the keys that have changed state.
 void handle_row(uint8_t hand, uint8_t row, uint8_t cols) {
 
+    if ((hand != HAND_LEFT) && (hand != HAND_RIGHT)) return;
+
     // Row offset into the keystate array
-    uint8_t offs = (hand == 0 ? 0 : 5);
+    uint8_t offs = (hand == HAND_LEFT ? ROFFSET_LEFT : ROFFSET_RIGHT);
 
     uint8_t change = keystate[row+offs] ^ cols;
     uint8_t i;
@@ -32,18 +37,14 @@ void handle_row(uint8_t hand, uint8_t row, uint8_t cols) {
 
 }
 
-/******************************************************************************/
 // Convert keypresses into scancodes.
 static void handle_key(uint8_t row, uint8_t col, uint8_t state) {
 
     set_usb_key(keymap[row][col], state);
-
-    // Send the report
     usb_keyboard_send();
 
 }
 
-/******************************************************************************/
 // Add the given scancode to the USB report if state is true,
 // otherwise remove it.
 static void set_usb_key(uint8_t scancode, uint8_t state) {
@@ -67,7 +68,7 @@ static void set_usb_key(uint8_t scancode, uint8_t state) {
     for (i=0; i<6; i++) {
         if (keyboard_keys[i] == from) {
             keyboard_keys[i] = to;
-            xprintf("%02d %02d %02d %02d\r\n", keyboard_keys[0], keyboard_keys[1], keyboard_keys[2], keyboard_keys[3]);
+            //xprintf("%02d %02d %02d %02d\r\n", keyboard_keys[0], keyboard_keys[1], keyboard_keys[2], keyboard_keys[3]);
             break;
         }
     }

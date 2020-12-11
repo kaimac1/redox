@@ -2,9 +2,11 @@
 #include <avr/pgmspace.h>
 #include "usb.h"
 
+#define HAND_LEFT   0
+#define HAND_RIGHT  1
+
 void handle_row(uint8_t hand, uint8_t row, uint8_t cols);
 
-/******************************************************************************/
 // This macro is just to lay out the keys in the layout (below) in a nicer format.
 #define MAP(                                                                \
                                                                             \

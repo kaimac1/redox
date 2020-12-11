@@ -8,14 +8,15 @@
 #include "matrix.h"
 #include "uart.h"
 
+const uint8_t channel = 20;
+uint8_t tx_address[5] = {0x4E,0xD0,0xBA,0x5E,0x00};
+uint8_t rx_address[5] = {0x4E,0xD0,0x00,0x00,0x00};
+
 /******************************************************************************/
 #define SLEEP_TIMEOUT (100000UL) //(300000UL * 1) // 10 minutes
-#define DEBUG 1
-#define CHANNEL 2
+#define DEBUG
 
 uint8_t msg[3];
-uint8_t tx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
-uint8_t rx_address[5] = {0x11,0x23,0x58,0x13,0x00};
 uint8_t matrix_prev[ROWS];
 uint8_t voltage;
 
@@ -23,7 +24,16 @@ void get_voltage(void);
 void check_voltage(void);
 void enter_sleep_mode(void);
 
-/******************************************************************************/
+void send_msg(uint8_t* msg) {
+
+    nrf24_send(msg);
+    while (nrf24_isSending());
+    #ifdef DEBUG
+        xprintf("\terr=%d retx=%d\r\n", nrf24_lastMessageStatus(), nrf24_retransmissionCount());
+    #endif
+
+}
+
 int main() {
 
     uint8_t i, change;
@@ -38,13 +48,14 @@ int main() {
     PORTE = (1 << 2);
     DDRE = 0;
     hand = (PINE & 0x04) ? 0 : 1;
-    xprintf("\r\nHand %d\r\n", hand);
+    xprintf("\r\nHand\t%d\r\n", hand);
+    xprintf("Channel\t%d\r\n", channel);
     
     // Initialise NRF24
     // Set the last byte of the address to the hand ID
     rx_address[4] = hand;
     nrf24_init();
-    nrf24_config(CHANNEL, sizeof msg);
+    nrf24_config(channel, sizeof msg);
     nrf24_tx_address(tx_address);
     nrf24_rx_address(rx_address);
 
@@ -74,12 +85,13 @@ int main() {
 
             // If this row has changed, send the row number and its current state
             if (change) {
-                if (DEBUG) xprintf("%d %08b -> %08b   %ld\r\n", i, matrix_prev[i], matrix[i], timeout);
+                #ifdef DEBUG
+                  xprintf("Row %d: %08b   %ld", i, matrix[i], timeout);
+                #endif
                 msg[1] = i;
                 msg[2] = matrix[i];
 
-                nrf24_send(msg);
-                while (nrf24_isSending());
+                send_msg(msg);
                 timeout = 0;
             }
 

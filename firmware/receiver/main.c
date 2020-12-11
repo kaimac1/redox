@@ -11,33 +11,43 @@
 #define CPU_16MHz       0x00
 #define CPU_8MHz        0x01
 
-/******************************************************************************/
-#define CHANNEL 2
-uint8_t msg[3];
+const uint8_t channel = 20;
 uint8_t tx_address[5] = {0xD7,0xD7,0xD7,0xD7,0xD7};
-uint8_t rx_address[5] = {0xBA,0x5E,0xBA,0x5E,0x00};
+uint8_t rx_address[5] = {0x4E,0xD0,0xBA,0x5E,0x00};
 
-/******************************************************************************/
+uint8_t msg[3];
+
+void timer_init(void) {
+    // 8M/64 = 
+    TCNT1 = 0;
+    TCCR1A = 0x00;
+    TCCR1B = 0x04;
+}
+uint16_t timer_value(void) {
+    return TCNT1;
+}
+
+
 int main() {
 
     CPU_PRESCALE(CPU_8MHz);
+    timer_init();
 
     uart_init();
     xdev_out(uart_putchar);
 
-    xprintf("\r\nInitialising USB...\r\n");
+    xprintf("\r\nUSB init:\t");
     usb_init();
     while (!usb_configured());
-    _delay_ms(1000);
+    xprintf("ok\r\n");
 
+    xprintf("Radio init:\t");
     nrf24_init();
-    nrf24_config(CHANNEL, sizeof msg);
+    nrf24_config(channel, sizeof msg);
     nrf24_tx_address(tx_address);
     nrf24_rx_address(rx_address);
-
-    xprintf("Ready\r\n");
     uint8_t st = nrf24_getStatus();
-    xprintf("status=%d\r\n", st);
+    xprintf("done, status=%d\r\n", st);
 
     DDRD |= (1<<6);
 
@@ -45,7 +55,7 @@ int main() {
         if (nrf24_dataReady()) {
             PORTD |= (1<<6);
             nrf24_getData(msg);
-            xprintf("got %d %d %d\r\n", msg[0], msg[1], msg[2]);
+            //xprintf("%u\tgot %d %d %d\r\n", timer_value(), msg[0], msg[1], msg[2]);
             handle_row(msg[0], msg[1], msg[2]);
             PORTD &= ~(1<<6);
         }

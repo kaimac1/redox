@@ -13,6 +13,8 @@
 */
 #include "nrf24.h"
 
+#define RF_PWR_LEVEL    0x01    // 0x01 = -12 dBm
+
 uint8_t payload_len;
 
 /* init the hardware pins */
@@ -40,8 +42,8 @@ void nrf24_config(uint8_t channel, uint8_t pay_length)
     nrf24_configRegister(RX_PW_P4, 0x00); // Pipe not used 
     nrf24_configRegister(RX_PW_P5, 0x00); // Pipe not used 
 
-    // 1 Mbps, TX gain: 0dbm
-    nrf24_configRegister(RF_SETUP, (0<<RF_DR)|((0x03)<<RF_PWR));
+    // 1 Mbps, TX gain: set by RF_PWR_LEVEL
+    nrf24_configRegister(RF_SETUP, (0<<RF_DR)|((RF_PWR_LEVEL)<<RF_PWR));
 
     // CRC enable, 1 byte CRC length
     nrf24_configRegister(CONFIG,nrf24_CONFIG);
