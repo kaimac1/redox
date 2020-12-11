@@ -13,3 +13,8 @@
 #define HAND_ADDRESS        {0x4E,0xD0,0x00,0x00,0x00}  // Last byte is set to 0/1 for left/right hand
 #define RF_CHANNEL          20
 
+typedef struct {
+    uint8_t hand;
+    uint8_t row;
+    uint8_t cols;
+} Message;

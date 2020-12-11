@@ -18,33 +18,30 @@ uint8_t matrix_prev[NUM_ROWS];
 void enter_sleep_mode(void);
 
 
+void send_message(Message* msg) {
 
-void send_msg(uint8_t* msg) {
-
-    nrf24_send(msg);
+    nrf24_send((uint8_t *)msg);
     while (nrf24_isSending());
     #ifdef DEBUG
         xprintf("\terr=%d retx=%d\r\n", nrf24_lastMessageStatus(), nrf24_retransmissionCount());
     #endif
-
 }
 
 int main(void) {
 
-    uint8_t msg[3];
+    Message msg;
     uint32_t timeout = 0;
 
     hw_init();
     uint8_t hand = detect_hand();
 
     xprintf("\r\nHand\t%d\r\n", hand);
-    xprintf("Channel\t%d\r\n", channel);
-    
+   
     // Initialise radio
     // Set the last byte of the address to the hand ID
     rx_address[4] = hand;
     nrf24_init();
-    nrf24_config(RF_CHANNEL, sizeof msg);
+    nrf24_config(RF_CHANNEL, sizeof(Message));
     nrf24_tx_address(tx_address);
     nrf24_rx_address(rx_address);
 
@@ -54,9 +51,7 @@ int main(void) {
     _delay_ms(250);
     led_set(0);
 
-    msg[0] = hand & 0x01;
-    msg[1] = 0;
-    msg[2] = 0;    
+    msg.hand = hand;
 
     // Scan the matrix and detect any changes.
     // Modified rows are sent to the receiver.
@@ -72,10 +67,10 @@ int main(void) {
                 #ifdef DEBUG
                   xprintf("Row %d: %08b   %ld", i, matrix[i], timeout);
                 #endif
-                msg[1] = i;
-                msg[2] = matrix[i];
+                msg.row = i;
+                msg.cols = matrix[i];
 
-                send_msg(msg);
+                send_message(&msg);
                 timeout = 0;
             }
 
@@ -88,7 +83,6 @@ int main(void) {
             enter_sleep_mode();
         }
     }
-
 }
 
 void enter_sleep_mode(void) {
@@ -104,7 +98,6 @@ void enter_sleep_mode(void) {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sei();                  // Enable interrupts       
     sleep_mode();
-
 }
 
 // Pin change interrupt - wakes the MCU up from sleep mode.
@@ -112,5 +105,4 @@ ISR(PCINT0_vect) {
 
     PCICR = 0;
     matrix_deselect();
-
 }

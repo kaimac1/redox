@@ -14,7 +14,6 @@
 
 uint8_t tx_address[nrf24_ADDR_LEN] = {0xD7,0xD7,0xD7,0xD7,0xD7};
 uint8_t rx_address[nrf24_ADDR_LEN] = RECEIVER_ADDRESS;
-uint8_t msg[3];
 
 void timer_init(void) {
     // 8M/64 = 
@@ -29,6 +28,8 @@ uint16_t timer_value(void) {
 
 int main() {
 
+    Message msg;
+
     CPU_PRESCALE(CPU_8MHz);
     timer_init();
 
@@ -42,7 +43,7 @@ int main() {
 
     xprintf("Radio init:\t");
     nrf24_init();
-    nrf24_config(RF_CHANNEL, sizeof msg);
+    nrf24_config(RF_CHANNEL, sizeof(Message));
     nrf24_tx_address(tx_address);
     nrf24_rx_address(rx_address);
     uint8_t st = nrf24_getStatus();
@@ -53,11 +54,10 @@ int main() {
     while (1) {    
         if (nrf24_dataReady()) {
             PORTD |= (1<<6);
-            nrf24_getData(msg);
+            nrf24_getData((uint8_t*)&msg);
             //xprintf("%u\tgot %d %d %d\r\n", timer_value(), msg[0], msg[1], msg[2]);
-            handle_row(msg[0], msg[1], msg[2]);
+            handle_row(msg.hand, msg.row, msg.cols);
             PORTD &= ~(1<<6);
         }
     }
-
 }
