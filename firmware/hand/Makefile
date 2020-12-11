@@ -20,7 +20,7 @@ ADEFS	= F_CPU=$(F_OSC)
 OPTIMIZE = s
 
 ### C Standard level (c89, gnu89, c99 or gnu99)
-CSTD = gnu89
+CSTD = c99
 
 ### Warning contorls
 WARNINGS = all extra
@@ -72,7 +72,7 @@ ALL_ASFLAGS = -mmcu=$(DEVICE) -I. -x assembler-with-cpp $(ASFLAGS) -fdata-sectio
 LDFLAGS += -Wl,-lm -Wl,--gc-sections,-Map,$(PROJECT).map
 
 # Default target.
-all: version build size
+all: build size
 
 ifeq ($(OUTPUT),ihex)
 build: elf hex lst sym
@@ -97,69 +97,47 @@ lst: $(PROJECT).lst
 sym: $(PROJECT).sym
 
 
-# Display compiler version information.
-version :
-	@$(CC) --version
-
 # Create final output file (.hex or .bin) from ELF output file.
 %.hex: %.elf
-	@echo
 	$(OBJCOPY) -O ihex $< $@
 
 %.bin: %.elf
-	@echo
 	$(OBJCOPY) -O binary $< $@
 
 # Create extended listing file from ELF output file.
 %.lst: %.elf
-	@echo
 	$(OBJDUMP) -h -S -C $< > $@
 
 # Create a symbol table from ELF output file.
 %.sym: %.elf
-	@echo
 	$(NM) -n $< > $@
 
 # Display size of file.
 size:
-	@echo
-	$(SIZE) -C --mcu=$(DEVICE) $(PROJECT).elf
+	@$(SIZE) -C --mcu=$(DEVICE) $(PROJECT).elf
 
 # Link: create ELF output file from object files.
 %.elf:  $(AOBJ) $(COBJ)
-	@echo
 	@echo Linking...
-	$(CC) $(CFLAGS) $(AOBJ) $(COBJ) --output $@
+	@$(CC) $(CFLAGS) $(AOBJ) $(COBJ) --output $@
 
 # Compile: create object files from C source files. ARM or Thumb(-2)
 $(COBJ) : $(OBJDIR)/%.o : %.c
-	@echo
-	@echo $< :
-	$(CC) -c $(CFLAGS) $< -o $@
+	@echo $<
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 # Assemble: create object files from assembler source files. ARM or Thumb(-2)
 $(AOBJ) : $(OBJDIR)/%.o : %.S
-	@echo
 	@echo $< :
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
 # Target: clean project.
 clean:
-	@echo
 	rm -f -r $(OBJDIR) | exit 0
 
 # Include the dependency files.
 -include $(shell mkdir $(OBJDIR) 2>/dev/null) $(wildcard $(OBJDIR)/*.d)
 
-pgm5:
-	@echo
-	avrdude -p m32u4 -P COM5 -c avr109 -U $(PROJECT).hex
-
-pgm9:
-	@echo
-	avrdude -p m32u4 -P COM9 -c avr109 -U $(PROJECT).hex
-
 pgm:
-	@echo
 	avrdude -p m32u4 -P usb -c avrisp2 -U $(PROJECT).hex
