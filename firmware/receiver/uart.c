@@ -2,7 +2,7 @@
 #include <util/delay.h>
 #include <stdint.h>
 
-#define UBRRVAL 51 // 9600 baud at 8 MHz
+#define UBRRVAL 1 // 250k baud at 8 MHz
 
 /******************************************************************************/
 void uart_init() {
