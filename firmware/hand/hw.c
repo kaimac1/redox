@@ -1,8 +1,10 @@
 #include "hw.h"
 #include "util/xprintf.h"
-#include <avr/io.h>
-#include <util/delay.h>
 #include <stdint.h>
+#include <avr/io.h>
+#include <avr/sleep.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
 
 void hw_init(void) {
 
@@ -56,6 +58,29 @@ void led_set(uint8_t set) {
     }
 }
 
+/******************************************************************************/
+// Sleep
+
+void enter_sleep_mode(void) {
+
+    xprintf("Sleep\r\n\r\n");
+
+    cli();
+    PORTD = 0x73;           // Select all rows
+    PCMSK0 = 0xFF;          // Enable all pin change interrupts
+    PCIFR = (1 << PCIF0);
+    PCICR = (1 << PCIE0);
+
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sei();                  // Enable interrupts
+    sleep_mode();
+}
+
+// Pin change interrupt - wakes the MCU up from sleep mode.
+ISR(PCINT0_vect) {
+
+    PCICR = 0;  // Turn off pin change interrupt
+}
 
 
 // Battery

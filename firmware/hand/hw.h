@@ -14,3 +14,5 @@ void uart_putchar(uint8_t tx);
 
 void led_init(void);
 void led_set(uint8_t set);
+
+void enter_sleep_mode(void);
