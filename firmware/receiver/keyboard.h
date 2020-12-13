@@ -4,7 +4,6 @@
 
 void handle_row(uint8_t hand, uint8_t row, uint8_t cols);
 
-// This macro is just to lay out the keys in the layout (below) in a nicer format.
 #define MAP(                                                                \
                                                                             \
 l07,l06,l05,l04,l03,l02,l01,                    r01,r02,r03,r04,r05,r06,r07,\
@@ -28,18 +27,4 @@ l47,l46,l45,l44,l43,        l10,l20,    r20,r10,        r43,r44,r45,r46,r47,\
     {KEY_##r40,KEY_##r41,KEY_##r42,KEY_##r43,KEY_##r44,KEY_##r45,KEY_##r46,KEY_##r47,}, \
 }
 
-
-/******************************************************************************/
-// This is the actual keyboard layout.
-
-static const uint8_t keymap[10][8] = 
-MAP(
-
-ESC, 1,   2,   3,   4,   5,   BKSL,                       TILD,6,   7,   8,   9,   0,   NONE,
-TAB, Q,   W,   E,   R,   T,   HASH,                       EQ,  Y,   U,   I,   O,   P,   MINS,
-BKSP,A,   S,   D,   F,   G,   LBRA,                       RBRA,H,   J,   K,   L,   SMCL,QUOT,
-SHFT,Z,   X,   C,   V,   B,                                    N,   M,   CMMA,UP,  STOP,SLSH,
-NONE,NONE,NONE,NONE,NONE,          NONE,NONE,   PGUP,DEL,           HOME,LEFT,DOWN,RGHT,END,
-                                        GUI,    PGDN,
-                            SPC, ALT,   CTRL,   NONE,   ENTR,SHFT
-);
+extern const uint8_t keymap[10][8];

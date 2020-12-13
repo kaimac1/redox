@@ -75,7 +75,9 @@ extern volatile uint8_t keyboard_leds;
 #define KEY_EQ  	46
 #define KEY_LBRA	47 // Left brace
 #define KEY_RBRA	48 // Right brace
-#define KEY_BKSL	49 // Backslash
+//#define KEY_BKSL	49 // Backslash (US)
+#define KEY_BKSL    0x64 // Backslash (UK)
+
 #define KEY_HASH 	50 // Hash/pound
 #define KEY_SMCL	51 // Semicolon
 #define KEY_QUOT	52 // Quote
@@ -126,6 +128,8 @@ extern volatile uint8_t keyboard_leds;
 #define KEYPAD_9	97	
 #define KEYPAD_0	98		
 #define KEYPAD_PERIOD	99		
+
+
 
 
 

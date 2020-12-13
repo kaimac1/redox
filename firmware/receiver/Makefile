@@ -2,7 +2,7 @@
 PROJECT = rx
 
 ### Source files and search directory
-CSRC    = main.c nrf24.c xprintf.c nrf24_pins.c uart.c usb.c keyboard.c
+CSRC    = main.c nrf24.c xprintf.c nrf24_pins.c uart.c usb.c keyboard.c keymap.c
 ASRC    = 
 VPATH   = util nrf24
 DEVICE  = atmega32u4
